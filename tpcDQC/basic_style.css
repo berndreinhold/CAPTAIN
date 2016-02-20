@@ -1,6 +1,5 @@
 body {  background-color: gray; }
 .headers { background-color: #d3d3d3; } /* only format some headers as light grey */
-/*.Fig_BasicInfo */
 
 .permalink { 
   color: #d3d3d3; 
@@ -18,15 +17,12 @@ img { color: blue; font-style: italic; }
   margin-left:3px;
   text-transform: uppercase;
   background-color: yellow;
-  #border-color: red;
-  #border-style: solid;
 }
 
-/*
-.headers .permalink {   
+
+#logo {   
   position:absolute;
-  right:10px;
-  top:15px; 
-  display:inline-block;
+  right:5px;
+  top:5px; 
+  #display:inline-block;
 }
-*/
