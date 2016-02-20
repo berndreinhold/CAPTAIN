@@ -4,9 +4,10 @@ Date : Dec. 23, 2015
 """
 import sys
 import shutil
+import time
 
 class html_picture_summary():
-    def __init__(self, of_name, of_dir="", CSS=[]):
+    def __init__(self, of_name, of_dir="", CSS=[], logo=("coracle-framework2.png","figures/coracle-framework2.png")):
         """
         CSS is a list of style sheets
         """
@@ -16,6 +17,9 @@ class html_picture_summary():
         self._CSS = CSS
         self._body = ""
         self._body_content = ""
+        self.logo = "<div id=\"logo\"><img src=\"%s\" height=\"75\"></div>" % logo[1]
+        shutil.copy(logo[0], self._output_dir + "/figures/")
+        self.footer = "<hr size=\"10\"/>\ndate of creation of this site: %s (MNT)" % time.strftime("%m/%d/%Y, %A, %I:%M %p", time.localtime())
 
     def header(self,title):
         """
@@ -33,9 +37,11 @@ class html_picture_summary():
     def body(self, title, comment=""):
         l = []
         l[len(l):] = ["<body>"]
+        l[len(l):] = [self.logo]
         l[len(l):] = ["<h1>%s</h1>" % title]
         l[len(l):] = [comment]
         l[len(l):] = [self._body_content]
+        l[len(l):] = [self.footer]
         l[len(l):] = ["</body>"]
         self._body = "\n".join(l)
 

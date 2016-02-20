@@ -43,7 +43,7 @@ class html_picture_summary_root(ho.html_picture_summary):
         #l[len(l):] = ['<h%d id="%s" class="headers">%s<a href="#%s" class="permalink">&para;</a><a href="#bottom" class="topbottom">bottom</a><a href="#top" class="topbottom">top</a></h%d>' % (level, "_".join(title.split()), title, "_".join(title.split()),level)] #http://www.tedmontgomery.com/tutorial/HTMLchrc.html
         match = re.findall(r'run ([0-9]{4})', title)
         if match:
-            l[len(l):] = ['<h%d id="%s" class="headers">%s (%s, <a href="tpcDQC_%s.html">all plots for %s</a>)<a href="#%s" class="permalink">&para;</a><a href="#top" class="topbottom">top</a></h%d>' % (level, "_".join(title.split()), title, "[date]", "_".join(title.split()), title, "_".join(title.split()),level)] #http://www.tedmontgomery.com/tutorial/HTMLchrc.html
+            l[len(l):] = ['<h%d id="%s" class="headers">%s (<a href="tpcDQC_%s.html">all plots for %s</a>)<a href="#%s" class="permalink">&para;</a><a href="#top" class="topbottom">top</a></h%d>' % (level, "_".join(title.split()), title, "_".join(title.split()), title, "_".join(title.split()),level)] #http://www.tedmontgomery.com/tutorial/HTMLchrc.html
         else:
             l[len(l):] = ['<h%d id="%s" class="headers">%s<a href="#%s" class="permalink">&para;</a></h%d>' % (level, "_".join(title.split()), title, "_".join(title.split()),level)] #http://www.tedmontgomery.com/tutorial/HTMLchrc.html
 
@@ -65,8 +65,11 @@ class html_picture_summary_root(ho.html_picture_summary):
                 l[len(l):] = ['</ol>']
                 l[len(l):] = ['* technically the datetime mentioned above is the date of creation of the ubdaq file on PDSF - it might simply refer to the time this run was transfered to PDSF.']
             elif type == "toc_vars":
-                l[len(l):] = [', '.join(['<a href="tpcDQC_%s.html">%s</a>' % (s[0],s[0]) for s in summary_struct])] #s: "tpc_DQC_FebMar2016.html"
-
+                #l[len(l):] = [', '.join(['<a href="tpcDQC_%s.html">%s</a>' % (s,s) for s in summary_struct])] #s: "tpc_DQC_FebMar2016.html"
+                l[len(l):] = ['<ul>']
+                for s in summary_struct:
+                    l[len(l):] = ['<li>%s</li>' % s] #s: "tpc_DQC_FebMar2016.html"
+                l[len(l):] = ['</ul>']
             elif type == "toc_plain":
                 l[len(l):] = ['<ul>']
                 for s in summary_struct:
@@ -203,75 +206,36 @@ class HTML_prod:
         self.output_filepath = output_filepath
 
 
-    def TOC(self, html, option=1):
+    def TOC(self, html, bSpecial=False):
+
+        html.body_content(["tpcDQC_FebMar2016.html"], "table of contents", 2, True, "toc_plain")
+
         #plot_sum.listruns("/home/reinhold/data/CAPTAIN/")
         self.plot_sum.listruns()
-
-        if option==1:
-            runlist_ = [("run %d" % run, self.plot_sum.creation_dates[run]) for run in self.plot_sum.run_list]
-            #html.body_content([], "table of contents", 2, True)
-            html.body_content(["tpcDQC_FebMar2016.html"], "table of contents", 2, True, "toc_plain")
-            html.body_content(runlist_, "per run", 3, True, "toc_runs")
-            #html.body_content(runlist_, "per variable", 3, True, "toc")
-
-            varlist = []
-            for i, (var2, priority_var) in enumerate(array_variables):
-                if var2 == "eventTiming":
-                    varlist.append((var2, i))
-                    continue
-                for ch, priority_ch in array_ch:
-                    #ignore priority argument, produce all:
-                    varlist.append((var2 + "_" + ch, i))
-            varlist.sort(key=lambda x: x[0])
-            #print(varlist)
-            html.body_content(varlist, "per variable", 3, True, "toc_vars")
-
-        elif option==2:
+        if bSpecial: #special format
             runlist_ = ["tpcDQC_run_%d.html" % x for x in self.plot_sum.run_list]
-            html.body_content(["tpcDQC_FebMar2016.html"], "table of contents", 2, True, "toc_plain")
             html.body_content(runlist_, "per run", 3, True, "toc_plain")
-            #html.body_content(runlist_, "per variable", 3, True, "toc")
-            varlist = []
-            for var2, priority_var in array_variables:
-                if var2 == "eventTiming":
-                    varlist.append(var2)
-                    continue
-                for ch, priority_ch in array_ch:
-                    #ignore priority argument, produce all:
-                    varlist.append(var2 + "_" + ch)
-            varlist.sort()
-            html.body_content(varlist, "per variable", 3, True, "toc_vars")
+        else:
+            runlist_ = [("run %d" % run, self.plot_sum.creation_dates[run]) for run in self.plot_sum.run_list]
+            html.body_content(runlist_, "per run", 3, True, "toc_runs")
 
-
-        elif option==3:
-            #self.plot_sum.listruns("/home/reinhold/data/CAPTAIN/")
-            self.plot_sum.listruns()
-
-            runlist = [("run %d" % run, self.plot_sum.creation_dates[run]) for run in self.plot_sum.run_list]
-            html.body_content(["tpcDQC_FebMar2016.html"], "table of contents", 2, True, "toc_plain")
-            html.body_content(runlist, "per run", 3, True, "toc_runs")
-
-            varlist = []
-            for var2, priority_var in array_variables:
-                if var2 == "eventTiming":
-                    varlist.append(var2)
-                    continue
-                for ch, priority_ch in array_ch:
-                    #ignore priority argument, produce all:
-                    varlist.append(var2 + "_" + ch)
-            varlist.sort()
-            html.body_content(varlist, "per variable", 3, True, "toc_vars")
-            #html.body_content(runlist_, "per variable", 3, True, "toc")
-
-        else: print("TOC option out of range (1-3):", option)
-
+        varlist = []
+        for var2, priority_var in array_variables:
+            if var2 == "eventTiming":
+                varlist.append('<a href="tpcDQC_%s.html">%s</a>' % (var2, var2))
+            else:
+                #ignore priority argument, produce all:
+                varlist.append(", ".join(['<a href="tpcDQC_%s.html">%s</a>' % (var2 + "_" + ch, var2 + "_" + ch) for ch, priority_ch in array_ch]))
+        varlist.sort()
+        html.body_content(varlist, "per variable", 3, True, "toc_vars")
         
     def SummaryWebsite(self):
 
         #output_filepath = "/home/reinhold/data/CAPTAIN/html/"
         output_filename = "tpcDQC_FebMar2016.html"
         os.system("cd %s; ln -s tpcDQC_FebMar2016.html index.html; cd %s;" % (self.output_filepath, os.getcwd()))
-        html = html_picture_summary_root(output_filename, self.output_filepath, ["basic_style.css"])
+        html = html_picture_summary_root(output_filename, self.output_filepath, ["basic_style.css"], ("coracle-framework2.png","figures/coracle-framework2.png"))
+        html.footer = "<hr size=\"10\" />\ndate of creation of this site: %s (MNT), comments? complaints? suggestions? write an email to bernd__AT__hawaii__DOT__edu, ysun7__AT__hawaii__DOT__edu or jelena__AT__phys__DOT__hawaii__DOT__edu" % time.strftime("%m/%d/%Y, %A, %I:%M %p", time.localtime())
 
         if 1:
 
@@ -289,12 +253,12 @@ class HTML_prod:
     def OneRunAllPlots(self, run):
         #output_filepath = "/home/reinhold/data/CAPTAIN/html/"
         output_filename = "tpcDQC_run_%d.html" % run
-        html = html_picture_summary_root(output_filename, self.output_filepath, ["basic_style.css"])
-
+        html = html_picture_summary_root(output_filename, self.output_filepath, ["basic_style.css"], ("coracle-framework2.png","figures/coracle-framework2.png"))
+        html.footer = "<hr size=\"10\" />\ndate of creation of this site: %s (MNT), comments? complaints? suggestions? write an email to bernd__AT__hawaii__DOT__edu, ysun7__AT__hawaii__DOT__edu or jelena__AT__phys__DOT__hawaii__DOT__edu" % time.strftime("%m/%d/%Y, %A, %I:%M %p", time.localtime())
 
         if 1:
 
-            self.TOC(html, 2) #2nd option for the per var case
+            self.TOC(html, True) #2nd option for the per var case
 
             varlist = []
             for var, priority_var in array_variables:
@@ -320,11 +284,12 @@ class HTML_prod:
 
         #output_filepath = "/home/reinhold/data/CAPTAIN/html/"
         output_filename = "tpcDQC_%s.html" % var
-        html = html_picture_summary_root(output_filename, self.output_filepath, ["basic_style.css"])
+        html = html_picture_summary_root(output_filename, self.output_filepath, ["basic_style.css"], ("coracle-framework2.png","figures/coracle-framework2.png"))
+        html.footer = "<hr size=\"10\" />\ndate of creation of this site: %s (MNT), comments? complaints? suggestions? write an email to bernd__AT__hawaii__DOT__edu, ysun7__AT__hawaii__DOT__edu or jelena__AT__phys__DOT__hawaii__DOT__edu" % time.strftime("%m/%d/%Y, %A, %I:%M %p", time.localtime())
 
         if 1:
 
-            self.TOC(html, 3)
+            self.TOC(html)
             html.body_content([], "plots", 2, True) #produces just a header line
             for run in self.plot_sum.run_list:
                 self.plot_sum.perRun(run, [var]) #the latter argument is a priority threshold: the lower this threshold, the fewer plots are produced
@@ -343,6 +308,8 @@ def main():
     plot_sum.produceAllPlots()
 
     H = HTML_prod(plot_sum, output_filepath)
+
+
     H.SummaryWebsite()
     #plot_sum.listruns("/home/reinhold/data/CAPTAIN/")
     plot_sum.listruns()
